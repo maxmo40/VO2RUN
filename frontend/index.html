@@ -177,6 +177,8 @@
       </div>
     </div>
     <script>
+      const API_BASE_URL = window.__API_URL__ || 'https://vo2run-production.up.railway.app';
+
       // Simple smooth scroll for internal links
       document.querySelectorAll('a[href^="#"]').forEach(a=>{
         a.addEventListener('click', function(e){
@@ -197,7 +199,7 @@
           message: form.elements['message'].value,
         };
         try {
-          const res = await fetch('/api/reservations', {
+          const res = await fetch(`${API_BASE_URL}/api/reservations`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -254,7 +256,7 @@
         const f = e.target;
         const data = { name: f.name.value, email: f.email.value, password: f.password.value };
         try{
-          const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+          const res = await fetch(`${API_BASE_URL}/api/register`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
           const body = await res.json();
           if(!res.ok){ msg.textContent = body.error || 'Erreur'; return; }
           msg.textContent = 'Compte créé — vous pouvez vous connecter.';
@@ -268,7 +270,7 @@
         msg.textContent = 'Connexion...';
         const f = e.target;
         try{
-          const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email: f.email.value, password: f.password.value }) });
+          const res = await fetch(`${API_BASE_URL}/api/login`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email: f.email.value, password: f.password.value }) });
           const body = await res.json();
           if(!res.ok){ msg.textContent = body.error || 'Erreur'; return; }
 
@@ -295,7 +297,7 @@
         // check auth
         let me;
         try{
-          const r = await fetch('/api/me');
+          const r = await fetch(`${API_BASE_URL}/api/me`);
           if(!r.ok) throw new Error('not auth');
           me = await r.json();
         }catch(e){
@@ -333,7 +335,7 @@
           msg.textContent = 'Création du créneau...';
           const f = e.target;
           try{
-            const res = await fetch('/api/create-checkout-session', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ date: f.date.value, time: f.time.value }) });
+            const res = await fetch(`${API_BASE_URL}/api/create-checkout-session`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ date: f.date.value, time: f.time.value }) });
             const body = await res.json();
             if(!res.ok){ msg.textContent = body.error || 'Erreur'; return; }
             // redirect to Stripe

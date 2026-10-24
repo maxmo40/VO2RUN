@@ -5,5 +5,12 @@
     "email": "demo@vo2run.fr",
     "passwordHash": "$2a$10$uTI0vIWa/w1glNMB9aXx1uPK/gUzW6XGHgVXOY3ZRv3wrZ6eCWOWS",
     "createdAt": "2026-10-24T21:40:16.187Z"
+  },
+  {
+    "id": 1792882631164,
+    "name": "Test User",
+    "email": "test-user@vo2run.fr",
+    "passwordHash": "$2a$10$AiiG4t9YRbC//HT45orIR.eSxu5eXPHoeGJCqt.hiwNp8f1uCmFeC",
+    "createdAt": "2026-10-24T22:57:11.239Z"
   }
 ]

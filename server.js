@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Stripe = require('stripe');
+const { createUser, loginUser, ensureDemoUser, initUsersTable } = require('./userService');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret';
 const stripe = process.env.STRIPE_SECRET_KEY ? Stripe(process.env.STRIPE_SECRET_KEY) : null;
@@ -14,7 +15,6 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const SUBMISSIONS_FILE = path.join(__dirname, 'submissions.json');
-const USERS_FILE = path.join(__dirname, 'users.json');
 const FRONTEND_DIR = path.join(__dirname, 'frontend');
 const DEMO_USER_EMAIL = 'demo@vo2run.fr';
 const DEMO_USER_PASSWORD = 'vo2run2026';
@@ -28,31 +28,18 @@ app.get('/index.html', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'index
 app.get('/pro', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'pro.html')));
 app.get('/pro.html', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'pro.html')));
 
-function ensureDemoUser() {
+async function bootUserStore() {
   try {
-    let users = [];
-    if (fs.existsSync(USERS_FILE)) {
-      const raw = fs.readFileSync(USERS_FILE, 'utf8');
-      users = raw ? JSON.parse(raw) : [];
+    if (process.env.DATABASE_URL) {
+      await initUsersTable();
     }
-
-    const exists = users.some(u => u.email && u.email.toLowerCase() === DEMO_USER_EMAIL.toLowerCase());
-    if (!exists) {
-      users.push({
-        id: 'demo-user',
-        name: 'Compte de démonstration',
-        email: DEMO_USER_EMAIL,
-        passwordHash: bcrypt.hashSync(DEMO_USER_PASSWORD, 10),
-        createdAt: new Date().toISOString(),
-      });
-      fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-    }
-  } catch (err) {
-    console.error('ensureDemoUser error', err);
+    await ensureDemoUser();
+  } catch (error) {
+    console.error('bootUserStore error', error);
   }
 }
 
-ensureDemoUser();
+bootUserStore();
 
 app.post('/api/reservations', async (req, res) => {
   try {
@@ -122,34 +109,8 @@ app.post('/api/register', async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) return res.status(400).json({ error: 'Nom, email et mot de passe requis' });
 
-    // lire users
-    let users = [];
-    try {
-      if (fs.existsSync(USERS_FILE)) {
-        const raw = fs.readFileSync(USERS_FILE, 'utf8');
-        users = raw ? JSON.parse(raw) : [];
-      }
-    } catch (e) {
-      console.error('Lecture users impossible', e);
-    }
+    const user = await createUser({ name, email, password });
 
-    const exists = users.find(u => u.email.toLowerCase() === String(email).toLowerCase());
-    if (exists) return res.status(409).json({ error: 'Un compte existe déjà pour cet email' });
-
-    const hash = bcrypt.hashSync(password, 10);
-    const user = {
-      id: Date.now(),
-      name,
-      email,
-      passwordHash: hash,
-      createdAt: new Date().toISOString(),
-    };
-    users.push(user);
-    try {
-      fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-    } catch (e) { console.error('Écriture users impossible', e); }
-
-    // Option: envoyer email de notification comme pour réservations
     if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS && process.env.NOTIFY_TO) {
       try {
         const transporter = nodemailer.createTransport({
@@ -171,10 +132,12 @@ app.post('/api/register', async (req, res) => {
       } catch (err) { console.error('Erreur envoi mail users', err); }
     }
 
-    return res.json({ ok: true });
+    return res.json({ ok: true, user: { id: user.id, name: user.name, email: user.email } });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'Erreur serveur' });
+    return res.status(err && err.statusCode === 409 ? 409 : 500).json({
+      error: err && err.message ? err.message : 'Erreur serveur',
+    });
   }
 });
 
@@ -183,21 +146,17 @@ app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email et mot de passe requis' });
-    let users = [];
-    try {
-      if (fs.existsSync(USERS_FILE)) {
-        const raw = fs.readFileSync(USERS_FILE, 'utf8');
-        users = raw ? JSON.parse(raw) : [];
-      }
-    } catch (e) { console.error('Lecture users impossible', e); }
-    const user = users.find(u => u.email.toLowerCase() === String(email).toLowerCase());
+
+    const user = await loginUser({ email, password });
     if (!user) return res.status(401).json({ error: 'Identifiants invalides' });
-    const ok = bcrypt.compareSync(password, user.passwordHash);
-    if (!ok) return res.status(401).json({ error: 'Identifiants invalides' });
+
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     res.cookie('token', token, { httpOnly: true, sameSite: 'lax', maxAge: 7*24*60*60*1000 });
-    return res.json({ ok: true });
-  } catch (err) { console.error(err); return res.status(500).json({ error: 'Erreur serveur' }); }
+    return res.json({ ok: true, user: { id: user.id, name: user.name, email: user.email } });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Erreur serveur' });
+  }
 });
 
 // whoami
