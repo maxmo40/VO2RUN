@@ -1,0 +1,9 @@
+[
+  {
+    "id": "demo-user",
+    "name": "Compte de démonstration",
+    "email": "demo@vo2run.fr",
+    "passwordHash": "$2a$10$uTI0vIWa/w1glNMB9aXx1uPK/gUzW6XGHgVXOY3ZRv3wrZ6eCWOWS",
+    "createdAt": "2026-10-24T21:40:16.187Z"
+  }
+]

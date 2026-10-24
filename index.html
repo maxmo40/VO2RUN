@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VO2RUN — VO2max La Réunion</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="navbar">
+        <div class="brand">VO2RUN</div>
+        <div class="nav-links">
+          <a href="#vo2">Le test</a>
+          <a href="#offres">Nos offres</a>
+          <a href="#centre">Notre centre</a>
+          <a href="#equipe">Notre équipe</a>
+          <a href="#contact">Contact</a>
+          <a class="btn cta" href="#reservation">Réserver mon test</a>
+          <a class="btn pro-btn" href="pro.html">Vous êtes pro ?</a>
+          <a href="#" id="authBtn" class="auth-link">Se connecter</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" id="home">
+        <video class="hero-video" autoplay muted loop playsinline>
+          <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
+        </video>
+        <div class="overlay"></div>
+        <div class="hero-content">
+          <h1>Testez votre VO2max au coeur de La Réunion</h1>
+          <p>
+            Mesurez votre consommation maximale d'oxygène (VO2max) pour optimiser
+            vos performances de trail et de vélo. Notre laboratoire est situé
+            à proximité des Hauts, avec des protocoles validés et un suivi
+            personnalisé.
+          </p>
+          <a class="btn primary" href="#reservation">Réserver mon test</a>
+        </div>
+      </section>
+
+      <section id="vo2" class="content">
+        <h2>Qu'est-ce que le test de VO2max ?</h2>
+        <p>
+          Le test de VO2max mesure la quantité maximale d'oxygène que votre
+          corps peut consommer pendant un effort intense. Réalisé sur
+          tapis ou ergomètre, il permet d'évaluer votre endurance aérobie,
+          de déterminer vos zones d'entraînement et d'orienter vos plans
+          d'entraînement.
+        </p>
+
+        <h3>Pourquoi le faire à La Réunion ?</h3>
+        <p>
+          La Réunion est une terre de traileurs et de cyclistes : l'altitude,
+          les pentes et la diversité des terrains rendent l'entraînement
+          particulièrement exigeant. Un test de VO2max local vous aide à
+          personnaliser votre préparation pour les courses locales et
+          internationales.
+        </p>
+      </section>
+
+      <section id="offres" class="content">
+        <h2>Nos offres</h2>
+        <div class="offers-grid">
+          <article class="offer-card">
+            <span class="offer-tag">Route</span>
+            <h3>Bilan Performance Route</h3>
+            <p>Analyse de la capacité aérobie, suivi des seuils et optimisation de la préparation sur distance et vitesse.</p>
+            <ul>
+              <li>Test VO2max</li>
+              <li>Seuils ventilatoires</li>
+              <li>Bilan personnalisé</li>
+            </ul>
+          </article>
+
+          <article class="offer-card">
+            <span class="offer-tag">Trail</span>
+            <h3>Bilan Performance Trail</h3>
+            <p>Évaluation de l’endurance sur terrain varié pour mieux piloter l’entraînement en montagne et en dénivelé.</p>
+            <ul>
+              <li>Profil de terrain</li>
+              <li>Endurance spécifique</li>
+              <li>Plan d’entraînement</li>
+            </ul>
+          </article>
+
+          <article class="offer-card">
+            <span class="offer-tag">Vélo</span>
+            <h3>Bilan Performance Vélo</h3>
+            <p>Mesure de la puissance et de l’efficacité énergétique pour améliorer la performance sur vélo de route et de montagne.</p>
+            <ul>
+              <li>VO2max et seuils</li>
+              <li>Analyse de puissance</li>
+              <li>Suivi performanciel</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="centre" class="content">
+        <h2>Notre centre</h2>
+        <p>
+          Laboratoire équipé d'appareils de mesure de dernière génération,
+          espace d'accueil, vestiaires et matériel adapté pour cyclistes et
+          coureurs.
+        </p>
+      </section>
+
+      <section id="equipe" class="content">
+        <h2>Notre équipe</h2>
+        <p>
+          Des physiologistes de l'exercice, préparateurs physiques et
+          techniciens expérimentés, habitués au suivi d'athlètes de
+          haut-niveau et amateurs exigeants.
+        </p>
+      </section>
+
+      <section id="reservation" class="content reservation">
+        <h2>Réserver mon test</h2>
+        <form class="form" id="reservationForm">
+          <label>Nom
+            <input type="text" name="name" required>
+          </label>
+          <label>Email
+            <input type="email" name="email" required>
+          </label>
+          <label>Téléphone
+            <input type="tel" name="phone">
+          </label>
+          <label>Message / Préférences
+            <textarea name="message"></textarea>
+          </label>
+          <button class="btn primary" type="submit">Envoyer la demande</button>
+          <div id="formMessage" aria-live="polite" style="margin-top:8px;color:rgba(255,255,255,0.9)"></div>
+        </form>
+      </section>
+
+      <section id="contact" class="content">
+        <h2>Contact</h2>
+        <p>Adresse, téléphone et horaires — placez ici les informations du centre.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>© VO2RUN — Tous droits réservés — La Réunion</p>
+    </footer>
+
+    <!-- Modal auth -->
+    <div id="authModal" class="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;z-index:60;">
+      <div class="modal-inner" style="background:#07101a;padding:20px;border-radius:10px;max-width:520px;width:94%;color:var(--muted);">
+        <button id="closeAuth" style="float:right;background:transparent;border:0;color:var(--muted);font-size:18px">✕</button>
+        <h3 style="color:var(--white);margin-top:0">Se connecter / S'inscrire</h3>
+        <div style="display:flex;gap:12px;margin-bottom:12px">
+          <button id="tabLogin" class="btn" style="flex:1">Connexion</button>
+          <button id="tabRegister" class="btn" style="flex:1">Inscription</button>
+        </div>
+        <div id="loginPane" style="display:none">
+          <p style="margin:0 0 12px;color:var(--muted);font-size:0.92rem;">Compte de démonstration : <strong>demo@vo2run.fr</strong> / <strong>vo2run2026</strong></p>
+          <form id="loginForm">
+            <label>Email <input type="email" name="email" value="demo@vo2run.fr" required></label>
+            <label>Mot de passe <input type="password" name="password" value="vo2run2026" required></label>
+            <div style="margin-top:8px"><button class="btn primary" type="submit">Se connecter</button></div>
+            <div id="loginMessage" style="margin-top:8px"></div>
+          </form>
+        </div>
+        <div id="registerPane" style="display:block">
+          <form id="registerForm">
+            <label>Nom <input type="text" name="name" required></label>
+            <label>Email <input type="email" name="email" required></label>
+            <label>Mot de passe <input type="password" name="password" required></label>
+            <div style="margin-top:8px"><button class="btn primary" type="submit">Créer mon compte</button></div>
+            <div id="registerMessage" style="margin-top:8px"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Simple smooth scroll for internal links
+      document.querySelectorAll('a[href^="#"]').forEach(a=>{
+        a.addEventListener('click', function(e){
+          const target = document.querySelector(this.getAttribute('href'));
+          if(target){ e.preventDefault(); target.scrollIntoView({behavior:'smooth'}); }
+        });
+      });
+      // Submit form to backend
+      const form = document.getElementById('reservationForm');
+      const formMessage = document.getElementById('formMessage');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        formMessage.textContent = 'Envoi en cours...';
+        const data = {
+          name: form.elements['name'].value,
+          email: form.elements['email'].value,
+          phone: form.elements['phone'].value,
+          message: form.elements['message'].value,
+        };
+        try {
+          const res = await fetch('/api/reservations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          });
+          if (!res.ok) {
+            const err = await res.json();
+            formMessage.textContent = 'Erreur : ' + (err.error || 'Impossible d\'envoyer la demande.');
+            return;
+          }
+          formMessage.textContent = 'Merci — votre demande a été envoyée.';
+          form.reset();
+        } catch (err) {
+          console.error(err);
+          formMessage.textContent = 'Erreur réseau — veuillez réessayer plus tard.';
+        }
+      });
+
+      // Auth modal logic
+      const authBtn = document.getElementById('authBtn');
+      const authModal = document.getElementById('authModal');
+      const closeAuth = document.getElementById('closeAuth');
+      const tabLogin = document.getElementById('tabLogin');
+      const tabRegister = document.getElementById('tabRegister');
+      const loginPane = document.getElementById('loginPane');
+      const registerPane = document.getElementById('registerPane');
+
+      const authStateKey = 'vo2run-auth';
+      function updateAuthButton() {
+        const raw = localStorage.getItem(authStateKey);
+        if (!raw) {
+          authBtn.textContent = 'Se connecter';
+          return;
+        }
+        try {
+          const user = JSON.parse(raw);
+          authBtn.textContent = 'Mon compte';
+          authBtn.title = user.email || 'Mon compte';
+        } catch (err) {
+          localStorage.removeItem(authStateKey);
+          authBtn.textContent = 'Se connecter';
+        }
+      }
+
+      authBtn.addEventListener('click', (e) => { e.preventDefault(); authModal.style.display = 'flex'; });
+      closeAuth.addEventListener('click', ()=> authModal.style.display='none');
+      tabLogin.addEventListener('click', ()=>{ loginPane.style.display='block'; registerPane.style.display='none'; });
+      tabRegister.addEventListener('click', ()=>{ registerPane.style.display='block'; loginPane.style.display='none'; });
+
+      // Register form
+      document.getElementById('registerForm').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const msg = document.getElementById('registerMessage');
+        msg.textContent = 'Envoi...';
+        const f = e.target;
+        const data = { name: f.name.value, email: f.email.value, password: f.password.value };
+        try{
+          const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+          const body = await res.json();
+          if(!res.ok){ msg.textContent = body.error || 'Erreur'; return; }
+          msg.textContent = 'Compte créé — vous pouvez vous connecter.';
+          f.reset();
+        }catch(err){ console.error(err); msg.textContent = 'Erreur réseau'; }
+      });
+
+      document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const msg = document.getElementById('loginMessage');
+        msg.textContent = 'Connexion...';
+        const f = e.target;
+        try{
+          const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email: f.email.value, password: f.password.value }) });
+          const body = await res.json();
+          if(!res.ok){ msg.textContent = body.error || 'Erreur'; return; }
+
+          localStorage.setItem(authStateKey, JSON.stringify({ email: f.email.value, name: 'Compte de démonstration' }));
+          updateAuthButton();
+          authModal.style.display = 'none';
+          msg.textContent = 'Connecté. Vous pouvez maintenant accéder à votre espace utilisateur.';
+          loginPane.style.display = 'none';
+          registerPane.style.display = 'block';
+        }catch(err){ console.error(err); msg.textContent = 'Erreur réseau'; }
+      });
+
+      updateAuthButton();
+          authModal.style.display='none';
+          await initBookingUI();
+        }catch(err){ console.error(err); msg.textContent = 'Erreur réseau'; }
+      });
+
+      // Booking UI: show form only if logged in
+      async function initBookingUI(){
+        const container = document.querySelector('#reservation .form')?.parentElement;
+        if(!container) return;
+        const bookingSection = document.getElementById('reservation');
+        // check auth
+        let me;
+        try{
+          const r = await fetch('/api/me');
+          if(!r.ok) throw new Error('not auth');
+          me = await r.json();
+        }catch(e){
+          // not authenticated: show prompt
+          bookingSection.innerHTML = `\n            <h2>Réserver mon test</h2>\n            <p>Vous devez être connecté pour réserver un créneau.</p>\n            <p><a href="#" id="openAuthFromReserve" class="btn">Se connecter / S'inscrire</a></p>`;
+          document.getElementById('openAuthFromReserve').addEventListener('click',(ev)=>{ ev.preventDefault(); authModal.style.display='flex'; });
+          return;
+        }
+
+        // show booking form
+        bookingSection.innerHTML = `
+          <h2>Réserver mon test</h2>
+          <form id="bookingForm" class="form">
+            <label>Date <input type="date" name="date" required></label>
+            <label>Heure
+              <select name="time" required>
+                <option value="09:00">09:00</option>
+                <option value="10:30">10:30</option>
+                <option value="14:00">14:00</option>
+                <option value="15:30">15:30</option>
+              </select>
+            </label>
+            <div style="margin-top:8px"><button class="btn primary" type="submit">Payer et réserver</button></div>
+            <div id="bookingMessage" style="margin-top:8px"></div>
+          </form>
+        `;
+        // set min date to today
+        const dateInput = document.querySelector('#bookingForm input[name="date"]');
+        const today = new Date().toISOString().slice(0,10);
+        dateInput.setAttribute('min', today);
+
+        document.getElementById('bookingForm').addEventListener('submit', async (e)=>{
+          e.preventDefault();
+          const msg = document.getElementById('bookingMessage');
+          msg.textContent = 'Création du créneau...';
+          const f = e.target;
+          try{
+            const res = await fetch('/api/create-checkout-session', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ date: f.date.value, time: f.time.value }) });
+            const body = await res.json();
+            if(!res.ok){ msg.textContent = body.error || 'Erreur'; return; }
+            // redirect to Stripe
+            window.location = body.url;
+          }catch(err){ console.error(err); msg.textContent = 'Erreur réseau'; }
+        });
+      }
+
+      // init booking UI on load
+      initBookingUI();
+    </script>
+  </body>
+</html>
