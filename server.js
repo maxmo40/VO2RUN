@@ -15,12 +15,18 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const SUBMISSIONS_FILE = path.join(__dirname, 'submissions.json');
 const USERS_FILE = path.join(__dirname, 'users.json');
+const FRONTEND_DIR = path.join(__dirname, 'frontend');
 const DEMO_USER_EMAIL = 'demo@vo2run.fr';
 const DEMO_USER_PASSWORD = 'vo2run2026';
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static(FRONTEND_DIR));
+
+app.get('/', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'index.html')));
+app.get('/index.html', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'index.html')));
+app.get('/pro', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'pro.html')));
+app.get('/pro.html', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'pro.html')));
 
 function ensureDemoUser() {
   try {
