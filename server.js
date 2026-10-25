@@ -4,6 +4,7 @@ const fs = require('fs');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
 const Stripe = require('stripe');
 const { createUser, loginUser, ensureDemoUser, initUsersTable } = require('./userService');
 
@@ -19,6 +20,10 @@ const FRONTEND_DIR = path.join(__dirname, 'frontend');
 const DEMO_USER_EMAIL = 'demo@vo2run.fr';
 const DEMO_USER_PASSWORD = 'vo2run2026';
 
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(FRONTEND_DIR));
