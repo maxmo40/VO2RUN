@@ -19,9 +19,31 @@ const SUBMISSIONS_FILE = path.join(__dirname, 'submissions.json');
 const FRONTEND_DIR = path.join(__dirname, 'frontend');
 const DEMO_USER_EMAIL = 'demo@vo2run.fr';
 const DEMO_USER_PASSWORD = 'vo2run2026';
+const allowedOrigins = new Set([
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'https://vo2run.vercel.app',
+  'https://www.vo2run.fr',
+  'https://vo2run-production.up.railway.app',
+]);
+
+function isSecureRequest(req) {
+  return Boolean(
+    process.env.NODE_ENV === 'production' ||
+    req.secure ||
+    req.headers['x-forwarded-proto'] === 'https' ||
+    (req.headers.origin && /^https:\/\//.test(req.headers.origin))
+  );
+}
 
 app.use(cors({
-  origin: true,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.has(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
 }));
 app.use(express.urlencoded({ extended: true }));
@@ -124,7 +146,7 @@ app.post('/api/register', async (req, res) => {
 
     const user = await createUser({ name, email, password });
     const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
-    const isSecure = process.env.NODE_ENV === 'production' || req.secure || req.headers['x-forwarded-proto'] === 'https';
+    const isSecure = isSecureRequest(req);
     res.cookie('token', token, {
       httpOnly: true,
       sameSite: isSecure ? 'none' : 'lax',
@@ -172,7 +194,7 @@ app.post('/api/login', async (req, res) => {
     if (!user) return res.status(401).json({ error: 'Identifiants invalides' });
 
     const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
-    const isSecure = process.env.NODE_ENV === 'production' || req.secure || req.headers['x-forwarded-proto'] === 'https';
+    const isSecure = isSecureRequest(req);
     res.cookie('token', token, {
       httpOnly: true,
       sameSite: isSecure ? 'none' : 'lax',
@@ -205,7 +227,7 @@ app.get('/api/me', (req, res) => {
 });
 
 app.post('/api/logout', (req, res) => {
-  const isSecure = process.env.NODE_ENV === 'production' || req.secure || req.headers['x-forwarded-proto'] === 'https';
+  const isSecure = isSecureRequest(req);
   res.clearCookie('token', {
     httpOnly: true,
     sameSite: isSecure ? 'none' : 'lax',
