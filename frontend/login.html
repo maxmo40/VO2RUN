@@ -9,6 +9,7 @@
   <body class="auth-page">
     <main class="auth-shell">
       <div class="auth-card">
+        <div id="envBadge" class="env-badge">Chargement du mode...</div>
         <a class="back-link" href="./index.html">← Retour</a>
         <h1>Se connecter</h1>
 
@@ -37,8 +38,14 @@
           ? window.location.origin
           : 'https://vo2run-production.up.railway.app'
       );
+      const envBadge = document.getElementById('envBadge');
       const form = document.getElementById('loginForm');
       const message = document.getElementById('loginMessage');
+      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+      envBadge.textContent = isLocal ? 'Mode : local' : 'Mode : production';
+      envBadge.classList.add(isLocal ? 'local' : 'prod');
+      envBadge.title = `API : ${API_BASE_URL}`;
       const params = new URLSearchParams(window.location.search);
       const nextPage = params.get('next') || './mon-espace.html';
 
