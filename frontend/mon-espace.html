@@ -55,7 +55,11 @@
     </main>
 
     <script>
-      const API_BASE_URL = window.__API_URL__ || 'https://vo2run-production.up.railway.app';
+      const API_BASE_URL = window.__API_URL__ || (
+        window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+          ? window.location.origin
+          : 'https://vo2run-production.up.railway.app'
+      );
       const authStateKey = 'vo2run-auth';
       const profileKey = 'vo2run-profile';
       const profileEmail = document.getElementById('profileEmail');
