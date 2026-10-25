@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VO2RUN — Réserver mon test</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="reservation-page">
+    <main class="reservation-shell">
+      <div class="reservation-header">
+        <a class="back-link" href="./index.html">← Retour</a>
+        <h1>Réserver mon test</h1>
+      </div>
+
+      <div id="bookingFlow">
+        <div class="reservation-step active" id="step-offer">
+          <div class="step-top">
+            <span class="step-badge">Étape 1</span>
+            <h2>Choisissez votre bilan</h2>
+          </div>
+
+          <div class="offer-choice-grid">
+            <button class="offer-choice selected" type="button" data-offer="Route" data-price="199">
+              <span class="offer-label">Route</span>
+              <strong>Bilan Performance Route</strong>
+              <small>199€</small>
+            </button>
+            <button class="offer-choice" type="button" data-offer="Trail" data-price="219">
+              <span class="offer-label">Trail</span>
+              <strong>Bilan Performance Trail</strong>
+              <small>219€</small>
+            </button>
+            <button class="offer-choice" type="button" data-offer="Vélo" data-price="229">
+              <span class="offer-label">Vélo</span>
+              <strong>Bilan Performance Vélo</strong>
+              <small>229€</small>
+            </button>
+          </div>
+
+          <div class="flow-actions">
+            <button class="btn primary next-step" type="button">Continuer</button>
+          </div>
+        </div>
+
+        <div class="reservation-step" id="step-date">
+          <div class="step-top">
+            <span class="step-badge">Étape 2</span>
+            <h2>Choisissez votre créneau</h2>
+          </div>
+
+          <div class="calendar-wrap">
+            <div class="calendar-grid" id="dateGrid"></div>
+            <div class="time-grid" id="timeGrid"></div>
+          </div>
+
+          <div class="flow-actions two-col">
+            <button class="btn secondary prev-step" type="button">Précédent</button>
+            <button class="btn primary next-step" type="button">Continuer</button>
+          </div>
+        </div>
+
+        <div class="reservation-step" id="step-summary">
+          <div class="step-top">
+            <span class="step-badge">Étape 3</span>
+            <h2>Récapitulatif et paiement</h2>
+          </div>
+
+          <div class="summary-panel">
+            <div class="summary-row">
+              <span>Test</span>
+              <strong id="summaryOffer">Bilan Performance Route</strong>
+            </div>
+            <div class="summary-row">
+              <span>Date</span>
+              <strong id="summaryDate">—</strong>
+            </div>
+            <div class="summary-row">
+              <span>Heure</span>
+              <strong id="summaryTime">—</strong>
+            </div>
+            <div class="summary-row total-row">
+              <span>Total</span>
+              <strong id="summaryPrice">199€</strong>
+            </div>
+          </div>
+
+          <label class="cgv-box">
+            <input type="checkbox" id="cgvCheckbox" />
+            <span>J'ai lu et j'accepte les conditions générales de vente.</span>
+          </label>
+
+          <div class="flow-actions two-col">
+            <button class="btn secondary prev-step" type="button">Précédent</button>
+            <button class="btn primary" id="payBtn" type="button">Payer maintenant</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const authStateKey = 'vo2run-auth';
+      const params = new URLSearchParams(window.location.search);
+      const nextPage = params.get('next') || './reservation.html';
+
+      const state = {
+        offer: 'Route',
+        offerPrice: 199,
+        date: '',
+        time: '',
+      };
+
+      const steps = [...document.querySelectorAll('.reservation-step')];
+      const offerButtons = [...document.querySelectorAll('.offer-choice')];
+      const dateGrid = document.getElementById('dateGrid');
+      const timeGrid = document.getElementById('timeGrid');
+      const summaryOffer = document.getElementById('summaryOffer');
+      const summaryDate = document.getElementById('summaryDate');
+      const summaryTime = document.getElementById('summaryTime');
+      const summaryPrice = document.getElementById('summaryPrice');
+      const cgvCheckbox = document.getElementById('cgvCheckbox');
+      const payBtn = document.getElementById('payBtn');
+
+      function ensureLoggedIn() {
+        const raw = localStorage.getItem(authStateKey);
+        if (!raw) {
+          window.location.href = './register.html?next=' + encodeURIComponent(nextPage);
+        }
+      }
+
+      function updateButtons() {
+        offerButtons.forEach((button) => {
+          const isSelected = button.dataset.offer === state.offer;
+          button.classList.toggle('selected', isSelected);
+        });
+      }
+
+      function renderDates() {
+        const base = new Date();
+        const dates = Array.from({ length: 7 }, (_, index) => {
+          const date = new Date(base);
+          date.setDate(base.getDate() + index + 1);
+          return date;
+        });
+
+        dateGrid.innerHTML = '';
+        dates.forEach((date) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'date-button';
+          const label = date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+          btn.textContent = label;
+          btn.dataset.date = date.toISOString().slice(0, 10);
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.date-button').forEach((el) => el.classList.remove('selected'));
+            btn.classList.add('selected');
+            state.date = btn.dataset.date;
+            updateSummary();
+          });
+          dateGrid.appendChild(btn);
+        });
+
+        const firstDate = dateGrid.querySelector('.date-button');
+        if (firstDate) {
+          firstDate.classList.add('selected');
+          state.date = firstDate.dataset.date;
+        }
+      }
+
+      function renderTimes() {
+        const times = ['09:00', '10:30', '12:00', '14:00', '15:30', '17:00'];
+        timeGrid.innerHTML = '';
+
+        times.forEach((time) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'time-button';
+          btn.textContent = time;
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.time-button').forEach((el) => el.classList.remove('selected'));
+            btn.classList.add('selected');
+            state.time = time;
+            updateSummary();
+          });
+          timeGrid.appendChild(btn);
+        });
+
+        const firstTime = timeGrid.querySelector('.time-button');
+        if (firstTime) {
+          firstTime.classList.add('selected');
+          state.time = firstTime.textContent;
+        }
+      }
+
+      function updateSummary() {
+        summaryOffer.textContent = `Bilan Performance ${state.offer}`;
+        summaryDate.textContent = state.date ? new Date(state.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : '—';
+        summaryTime.textContent = state.time || '—';
+        summaryPrice.textContent = `${state.offerPrice}€`;
+      }
+
+      function showStep(index) {
+        steps.forEach((step, idx) => step.classList.toggle('active', idx === index));
+      }
+
+      offerButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          state.offer = button.dataset.offer;
+          state.offerPrice = Number(button.dataset.price);
+          updateButtons();
+          updateSummary();
+        });
+      });
+
+      document.querySelectorAll('.next-step').forEach((button) => {
+        button.addEventListener('click', () => {
+          const currentIndex = steps.findIndex((step) => step.classList.contains('active'));
+          if (currentIndex < steps.length - 1) {
+            showStep(currentIndex + 1);
+          }
+        });
+      });
+
+      document.querySelectorAll('.prev-step').forEach((button) => {
+        button.addEventListener('click', () => {
+          const currentIndex = steps.findIndex((step) => step.classList.contains('active'));
+          if (currentIndex > 0) {
+            showStep(currentIndex - 1);
+          }
+        });
+      });
+
+      payBtn.addEventListener('click', () => {
+        if (!cgvCheckbox.checked) {
+          alert('Merci de cocher la case des conditions générales de vente pour continuer.');
+          return;
+        }
+
+        alert('Paiement validé — votre réservation est enregistrée.');
+      });
+
+      ensureLoggedIn();
+      updateButtons();
+      renderDates();
+      renderTimes();
+      updateSummary();
+      showStep(0);
+    </script>
+  </body>
+</html>

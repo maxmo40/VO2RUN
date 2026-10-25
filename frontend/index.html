@@ -16,9 +16,9 @@
           <a href="#centre">Notre centre</a>
           <a href="#equipe">Notre équipe</a>
           <a href="#contact">Contact</a>
-          <a class="btn cta" href="#reservation">Réserver mon test</a>
+          <a class="btn cta" href="./reservation.html">Réserver mon test</a>
           <a class="btn pro-btn" href="./pro.html">Vous êtes pro ?</a>
-          <a href="#" id="authBtn" class="auth-link">Se connecter</a>
+          <a href="./login.html" id="authBtn" class="auth-link">Se connecter</a>
         </div>
       </nav>
     </header>
@@ -37,7 +37,7 @@
             à proximité des Hauts, avec des protocoles validés et un suivi
             personnalisé.
           </p>
-          <a class="btn primary" href="#reservation">Réserver mon test</a>
+          <a class="btn primary" href="./reservation.html">Réserver mon test</a>
         </div>
       </section>
 
@@ -231,19 +231,29 @@
         const raw = localStorage.getItem(authStateKey);
         if (!raw) {
           authBtn.textContent = 'Se connecter';
+          authBtn.href = './login.html';
+          authBtn.title = 'Se connecter';
           return;
         }
         try {
           const user = JSON.parse(raw);
-          authBtn.textContent = 'Mon compte';
-          authBtn.title = user.email || 'Mon compte';
+          authBtn.textContent = 'Mon espace';
+          authBtn.href = './mon-espace.html';
+          authBtn.title = user.email || 'Mon espace';
         } catch (err) {
           localStorage.removeItem(authStateKey);
           authBtn.textContent = 'Se connecter';
+          authBtn.href = './login.html';
+          authBtn.title = 'Se connecter';
         }
       }
 
-      authBtn.addEventListener('click', (e) => { e.preventDefault(); authModal.style.display = 'flex'; });
+      authBtn.addEventListener('click', (e) => {
+        if (!localStorage.getItem(authStateKey)) {
+          e.preventDefault();
+          authModal.style.display = 'flex';
+        }
+      });
       closeAuth.addEventListener('click', ()=> authModal.style.display='none');
       tabLogin.addEventListener('click', ()=>{ loginPane.style.display='block'; registerPane.style.display='none'; });
       tabRegister.addEventListener('click', ()=>{ registerPane.style.display='block'; loginPane.style.display='none'; });

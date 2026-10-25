@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VO2RUN — Mon espace</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="auth-page">
+    <main class="auth-shell">
+      <div class="auth-card">
+        <a class="back-link" href="./index.html">← Retour au site</a>
+        <h1>Mon espace</h1>
+
+        <div class="profile-card">
+          <div class="profile-row">
+            <span class="profile-label">Nom</span>
+            <strong id="profileName">—</strong>
+          </div>
+          <div class="profile-row">
+            <span class="profile-label">Email</span>
+            <strong id="profileEmail">—</strong>
+          </div>
+        </div>
+
+        <div style="margin-top:20px; display:grid; gap:10px;">
+          <button class="btn primary" type="button" id="goHomeBtn">Retour à l'accueil</button>
+          <button class="btn" type="button" id="logoutBtn">Se déconnecter</button>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const authStateKey = 'vo2run-auth';
+      const profileName = document.getElementById('profileName');
+      const profileEmail = document.getElementById('profileEmail');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const goHomeBtn = document.getElementById('goHomeBtn');
+
+      function loadUser() {
+        const raw = localStorage.getItem(authStateKey);
+        if (!raw) {
+          window.location.href = './login.html';
+          return;
+        }
+
+        try {
+          const user = JSON.parse(raw);
+          profileName.textContent = user.name || 'Utilisateur';
+          profileEmail.textContent = user.email || '—';
+        } catch (error) {
+          localStorage.removeItem(authStateKey);
+          window.location.href = './login.html';
+        }
+      }
+
+      logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem(authStateKey);
+        window.location.href = './index.html';
+      });
+
+      goHomeBtn.addEventListener('click', () => {
+        window.location.href = './index.html';
+      });
+
+      loadUser();
+    </script>
+  </body>
+</html>

@@ -25,6 +25,14 @@ app.use(express.static(FRONTEND_DIR));
 
 app.get('/', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'index.html')));
 app.get('/index.html', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'index.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'login.html')));
+app.get('/login.html', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'login.html')));
+app.get('/register', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'register.html')));
+app.get('/register.html', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'register.html')));
+app.get('/mon-espace', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'mon-espace.html')));
+app.get('/mon-espace.html', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'mon-espace.html')));
+app.get('/reservation', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'reservation.html')));
+app.get('/reservation.html', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'reservation.html')));
 app.get('/pro', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'pro.html')));
 app.get('/pro.html', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'pro.html')));
 

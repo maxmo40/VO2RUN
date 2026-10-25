@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VO2RUN — Se connecter</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="auth-page">
+    <main class="auth-shell">
+      <div class="auth-card">
+        <a class="back-link" href="./index.html">← Retour</a>
+        <h1>Se connecter</h1>
+
+        <form class="auth-form" id="loginForm">
+          <label>
+            Email
+            <input type="email" name="email" placeholder="vous@exemple.com" required />
+          </label>
+          <label>
+            Mot de passe
+            <input type="password" name="password" placeholder="Votre mot de passe" required />
+          </label>
+          <button type="submit" class="btn primary">Se connecter</button>
+          <div id="loginMessage" class="auth-message" aria-live="polite"></div>
+        </form>
+
+        <p class="auth-subtext">
+          Pas encore de compte ? <a href="./register.html">Créer un compte</a>
+        </p>
+      </div>
+    </main>
+
+    <script>
+      const API_BASE_URL = window.__API_URL__ || 'https://vo2run-production.up.railway.app';
+      const form = document.getElementById('loginForm');
+      const message = document.getElementById('loginMessage');
+      const params = new URLSearchParams(window.location.search);
+      const nextPage = params.get('next') || './reservation.html';
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        message.textContent = 'Connexion en cours...';
+
+        const payload = {
+          email: form.email.value,
+          password: form.password.value,
+        };
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            message.textContent = data.error || 'Email ou mot de passe invalide.';
+            return;
+          }
+
+          localStorage.setItem('vo2run-auth', JSON.stringify({ email: payload.email, name: data.user?.name || 'Compte VO2RUN' }));
+          message.textContent = 'Connexion réussie. Redirection...';
+          setTimeout(() => window.location.href = nextPage, 600);
+        } catch (error) {
+          console.error(error);
+          message.textContent = 'Erreur réseau. Merci de réessayer.';
+        }
+      });
+    </script>
+  </body>
+</html>

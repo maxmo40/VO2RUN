@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VO2RUN — Créer un compte</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="auth-page">
+    <main class="auth-shell">
+      <div class="auth-card">
+        <a class="back-link" href="./index.html">← Retour</a>
+        <h1>Créer un compte</h1>
+
+        <form class="auth-form" id="registerForm">
+          <label>
+            Nom
+            <input type="text" name="name" placeholder="Votre nom" required />
+          </label>
+          <label>
+            Email
+            <input type="email" name="email" placeholder="vous@exemple.com" required />
+          </label>
+          <label>
+            Mot de passe
+            <input type="password" name="password" placeholder="Minimum 8 caractères" required />
+          </label>
+          <button type="submit" class="btn primary">Créer mon compte</button>
+          <div id="registerMessage" class="auth-message" aria-live="polite"></div>
+        </form>
+
+        <p class="auth-subtext">
+          Déjà inscrit ? <a href="./login.html">Se connecter</a>
+        </p>
+      </div>
+    </main>
+
+    <script>
+      const API_BASE_URL = window.__API_URL__ || 'https://vo2run-production.up.railway.app';
+      const form = document.getElementById('registerForm');
+      const message = document.getElementById('registerMessage');
+      const params = new URLSearchParams(window.location.search);
+      const nextPage = params.get('next') || './reservation.html';
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        message.textContent = 'Création du compte...';
+
+        const payload = {
+          name: form.name.value,
+          email: form.email.value,
+          password: form.password.value,
+        };
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            message.textContent = data.error || 'Erreur lors de la création du compte.';
+            return;
+          }
+
+          localStorage.setItem('vo2run-auth', JSON.stringify({ email: payload.email, name: payload.name }));
+          message.textContent = 'Compte créé avec succès. Redirection...';
+          form.reset();
+          setTimeout(() => window.location.href = nextPage, 700);
+        } catch (error) {
+          console.error(error);
+          message.textContent = 'Erreur réseau. Merci de réessayer.';
+        }
+      });
+    </script>
+  </body>
+</html>
