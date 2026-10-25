@@ -68,6 +68,29 @@
       const logoutBtn = document.getElementById('logoutBtn');
       const goHomeBtn = document.getElementById('goHomeBtn');
 
+      const firstNameInput = profileForm.elements.namedItem('firstName');
+      const lastNameInput = profileForm.elements.namedItem('lastName');
+      const birthDateInput = profileForm.elements.namedItem('birthDate');
+      const heightInput = profileForm.elements.namedItem('height');
+      const weightInput = profileForm.elements.namedItem('weight');
+
+      function readStoredProfile() {
+        try {
+          const raw = localStorage.getItem(profileKey);
+          return raw ? JSON.parse(raw) : {};
+        } catch (error) {
+          console.warn('Invalid saved profile', error);
+          localStorage.removeItem(profileKey);
+          return {};
+        }
+      }
+
+      function setFieldValue(input, value) {
+        if (input && value !== undefined && value !== null && value !== '') {
+          input.value = value;
+        }
+      }
+
       async function loadUser() {
         try {
           const response = await fetch(`${API_BASE_URL}/api/me`, { credentials: 'include' });
@@ -78,12 +101,12 @@
           profileEmail.textContent = user.email || '—';
           localStorage.setItem(authStateKey, JSON.stringify({ email: user.email, name: user.name || 'Utilisateur' }));
 
-          const saved = JSON.parse(localStorage.getItem(profileKey) || '{}');
-          if (saved.firstName) profileForm.firstName.value = saved.firstName;
-          if (saved.lastName) profileForm.lastName.value = saved.lastName;
-          if (saved.birthDate) profileForm.birthDate.value = saved.birthDate;
-          if (saved.height) profileForm.height.value = saved.height;
-          if (saved.weight) profileForm.weight.value = saved.weight;
+          const saved = readStoredProfile();
+          setFieldValue(firstNameInput, saved.firstName);
+          setFieldValue(lastNameInput, saved.lastName);
+          setFieldValue(birthDateInput, saved.birthDate);
+          setFieldValue(heightInput, saved.height);
+          setFieldValue(weightInput, saved.weight);
         } catch (error) {
           localStorage.removeItem(authStateKey);
           window.location.replace('./login.html');
@@ -93,14 +116,20 @@
       profileForm.addEventListener('submit', (event) => {
         event.preventDefault();
         const data = {
-          firstName: profileForm.firstName.value.trim(),
-          lastName: profileForm.lastName.value.trim(),
-          birthDate: profileForm.birthDate.value,
-          height: profileForm.height.value,
-          weight: profileForm.weight.value,
+          firstName: (firstNameInput && firstNameInput.value ? firstNameInput.value.trim() : ''),
+          lastName: (lastNameInput && lastNameInput.value ? lastNameInput.value.trim() : ''),
+          birthDate: birthDateInput ? birthDateInput.value : '',
+          height: heightInput ? heightInput.value : '',
+          weight: weightInput ? weightInput.value : '',
         };
-        localStorage.setItem(profileKey, JSON.stringify(data));
-        profileMessage.textContent = 'Informations enregistrées.';
+
+        try {
+          localStorage.setItem(profileKey, JSON.stringify(data));
+          profileMessage.textContent = 'Informations enregistrées.';
+        } catch (error) {
+          console.warn('Could not save profile locally', error);
+          profileMessage.textContent = 'Erreur d’enregistrement local. Merci de réessayer.';
+        }
       });
 
       logoutBtn.addEventListener('click', async () => {
