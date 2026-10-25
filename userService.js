@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
 
 const USERS_FILE = path.join(__dirname, 'users.json');
+let databaseFallbackMode = false;
 
 function normalizeEmail(email = '') {
   return String(email).trim().toLowerCase();
@@ -36,7 +37,7 @@ function validateUserInput({ name, email, password }) {
 }
 
 function getPool() {
-  if (!process.env.DATABASE_URL) {
+  if (!process.env.DATABASE_URL || databaseFallbackMode) {
     return null;
   }
 
@@ -53,7 +54,7 @@ function isDatabaseConnectionError(error) {
 }
 
 async function withDatabaseFallback(fallback, operation) {
-  if (!process.env.DATABASE_URL) {
+  if (!process.env.DATABASE_URL || databaseFallbackMode) {
     return fallback();
   }
 
@@ -66,6 +67,7 @@ async function withDatabaseFallback(fallback, operation) {
     return await operation(pool);
   } catch (error) {
     if (isDatabaseConnectionError(error)) {
+      databaseFallbackMode = true;
       console.warn('Database unavailable, falling back to local JSON store:', error.message || error);
       return fallback();
     }
