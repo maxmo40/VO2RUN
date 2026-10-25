@@ -22,6 +22,7 @@ const DEMO_USER_PASSWORD = 'vo2run2026';
 const allowedOrigins = new Set([
   'http://localhost:3000',
   'http://127.0.0.1:3000',
+  'https://vo-2-run.vercel.app',
   'https://vo2run.vercel.app',
   'https://www.vo2run.fr',
   'https://vo2run-production.up.railway.app',
@@ -64,17 +65,18 @@ app.get('/pro', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'pro.html')))
 app.get('/pro.html', (req, res) => res.sendFile(path.join(FRONTEND_DIR, 'pro.html')));
 
 async function bootUserStore() {
-  try {
-    if (process.env.DATABASE_URL) {
-      await initUsersTable();
-    }
-    await ensureDemoUser();
-  } catch (error) {
-    console.error('bootUserStore error', error);
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is required. Local JSON fallback was removed.');
   }
+
+  await initUsersTable();
+  await ensureDemoUser();
 }
 
-bootUserStore();
+bootUserStore().catch((error) => {
+  console.error('bootUserStore error', error);
+  process.exit(1);
+});
 
 app.post('/api/reservations', async (req, res) => {
   try {
