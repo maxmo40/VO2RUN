@@ -40,7 +40,7 @@
       const form = document.getElementById('registerForm');
       const message = document.getElementById('registerMessage');
       const params = new URLSearchParams(window.location.search);
-      const nextPage = params.get('next') || './reservation.html';
+      const nextPage = params.get('next') || './mon-espace.html';
 
       form.addEventListener('submit', async (event) => {
         event.preventDefault();

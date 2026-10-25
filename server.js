@@ -123,6 +123,14 @@ app.post('/api/register', async (req, res) => {
     if (!name || !email || !password) return res.status(400).json({ error: 'Nom, email et mot de passe requis' });
 
     const user = await createUser({ name, email, password });
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const isSecure = process.env.NODE_ENV === 'production' || req.secure || req.headers['x-forwarded-proto'] === 'https';
+    res.cookie('token', token, {
+      httpOnly: true,
+      sameSite: isSecure ? 'none' : 'lax',
+      secure: isSecure,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS && process.env.NOTIFY_TO) {
       try {
@@ -164,7 +172,13 @@ app.post('/api/login', async (req, res) => {
     if (!user) return res.status(401).json({ error: 'Identifiants invalides' });
 
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
-    res.cookie('token', token, { httpOnly: true, sameSite: 'lax', maxAge: 7*24*60*60*1000 });
+    const isSecure = process.env.NODE_ENV === 'production' || req.secure || req.headers['x-forwarded-proto'] === 'https';
+    res.cookie('token', token, {
+      httpOnly: true,
+      sameSite: isSecure ? 'none' : 'lax',
+      secure: isSecure,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
     return res.json({ ok: true, user: { id: user.id, name: user.name, email: user.email } });
   } catch (err) {
     console.error(err);

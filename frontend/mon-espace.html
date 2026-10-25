@@ -7,21 +7,45 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body class="auth-page">
-    <main class="auth-shell">
-      <div class="auth-card">
+    <main class="auth-shell wide-shell">
+      <div class="auth-card profile-card-page">
         <a class="back-link" href="./index.html">← Retour au site</a>
         <h1>Mon espace</h1>
 
-        <div class="profile-card">
-          <div class="profile-row">
-            <span class="profile-label">Nom</span>
-            <strong id="profileName">—</strong>
-          </div>
+        <div class="profile-summary">
           <div class="profile-row">
             <span class="profile-label">Email</span>
             <strong id="profileEmail">—</strong>
           </div>
         </div>
+
+        <form id="profileForm" class="auth-form profile-form">
+          <div class="field-grid">
+            <label>
+              Prénom
+              <input type="text" name="firstName" placeholder="Votre prénom" />
+            </label>
+            <label>
+              Nom
+              <input type="text" name="lastName" placeholder="Votre nom" />
+            </label>
+            <label>
+              Date de naissance
+              <input type="date" name="birthDate" />
+            </label>
+            <label>
+              Taille (cm)
+              <input type="number" name="height" min="120" max="220" placeholder="175" />
+            </label>
+            <label>
+              Poids (kg)
+              <input type="number" name="weight" min="30" max="200" placeholder="68" />
+            </label>
+          </div>
+
+          <button type="submit" class="btn primary">Enregistrer mes informations</button>
+          <div id="profileMessage" class="auth-message" aria-live="polite"></div>
+        </form>
 
         <div style="margin-top:20px; display:grid; gap:10px;">
           <button class="btn primary" type="button" id="goHomeBtn">Retour à l'accueil</button>
@@ -31,31 +55,53 @@
     </main>
 
     <script>
+      const API_BASE_URL = window.__API_URL__ || 'https://vo2run-production.up.railway.app';
       const authStateKey = 'vo2run-auth';
-      const profileName = document.getElementById('profileName');
+      const profileKey = 'vo2run-profile';
       const profileEmail = document.getElementById('profileEmail');
+      const profileForm = document.getElementById('profileForm');
+      const profileMessage = document.getElementById('profileMessage');
       const logoutBtn = document.getElementById('logoutBtn');
       const goHomeBtn = document.getElementById('goHomeBtn');
 
-      function loadUser() {
-        const raw = localStorage.getItem(authStateKey);
-        if (!raw) {
-          window.location.href = './login.html';
-          return;
-        }
-
+      async function loadUser() {
         try {
-          const user = JSON.parse(raw);
-          profileName.textContent = user.name || 'Utilisateur';
+          const response = await fetch(`${API_BASE_URL}/api/me`, { credentials: 'include' });
+          if (!response.ok) {
+            throw new Error('not authenticated');
+          }
+          const user = await response.json();
           profileEmail.textContent = user.email || '—';
+          localStorage.setItem(authStateKey, JSON.stringify({ email: user.email, name: user.name || 'Utilisateur' }));
+
+          const saved = JSON.parse(localStorage.getItem(profileKey) || '{}');
+          if (saved.firstName) profileForm.firstName.value = saved.firstName;
+          if (saved.lastName) profileForm.lastName.value = saved.lastName;
+          if (saved.birthDate) profileForm.birthDate.value = saved.birthDate;
+          if (saved.height) profileForm.height.value = saved.height;
+          if (saved.weight) profileForm.weight.value = saved.weight;
         } catch (error) {
           localStorage.removeItem(authStateKey);
           window.location.href = './login.html';
         }
       }
 
+      profileForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const data = {
+          firstName: profileForm.firstName.value.trim(),
+          lastName: profileForm.lastName.value.trim(),
+          birthDate: profileForm.birthDate.value,
+          height: profileForm.height.value,
+          weight: profileForm.weight.value,
+        };
+        localStorage.setItem(profileKey, JSON.stringify(data));
+        profileMessage.textContent = 'Informations enregistrées.';
+      });
+
       logoutBtn.addEventListener('click', () => {
         localStorage.removeItem(authStateKey);
+        localStorage.removeItem(profileKey);
         window.location.href = './index.html';
       });
 

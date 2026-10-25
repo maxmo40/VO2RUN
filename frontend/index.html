@@ -227,19 +227,18 @@
       const registerPane = document.getElementById('registerPane');
 
       const authStateKey = 'vo2run-auth';
-      function updateAuthButton() {
-        const raw = localStorage.getItem(authStateKey);
-        if (!raw) {
-          authBtn.textContent = 'Se connecter';
-          authBtn.href = './login.html';
-          authBtn.title = 'Se connecter';
-          return;
-        }
+      async function updateAuthButton() {
         try {
-          const user = JSON.parse(raw);
+          const response = await fetch(`${API_BASE_URL}/api/me`, { credentials: 'include' });
+          if (!response.ok) {
+            throw new Error('not authenticated');
+          }
+          const user = await response.json();
           authBtn.textContent = 'Mon espace';
           authBtn.href = './mon-espace.html';
           authBtn.title = user.email || 'Mon espace';
+          localStorage.setItem(authStateKey, JSON.stringify({ email: user.email, name: user.name || 'Utilisateur' }));
+          return;
         } catch (err) {
           localStorage.removeItem(authStateKey);
           authBtn.textContent = 'Se connecter';
