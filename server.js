@@ -123,7 +123,7 @@ app.post('/api/register', async (req, res) => {
     if (!name || !email || !password) return res.status(400).json({ error: 'Nom, email et mot de passe requis' });
 
     const user = await createUser({ name, email, password });
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
     const isSecure = process.env.NODE_ENV === 'production' || req.secure || req.headers['x-forwarded-proto'] === 'https';
     res.cookie('token', token, {
       httpOnly: true,
@@ -171,7 +171,7 @@ app.post('/api/login', async (req, res) => {
     const user = await loginUser({ email, password });
     if (!user) return res.status(401).json({ error: 'Identifiants invalides' });
 
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
     const isSecure = process.env.NODE_ENV === 'production' || req.secure || req.headers['x-forwarded-proto'] === 'https';
     res.cookie('token', token, {
       httpOnly: true,
@@ -200,7 +200,7 @@ app.get('/api/me', (req, res) => {
     const token = getTokenFromReq(req);
     if (!token) return res.status(401).json({ error: 'Not authenticated' });
     const payload = jwt.verify(token, JWT_SECRET);
-    return res.json({ id: payload.id, email: payload.email });
+    return res.json({ id: payload.id, email: payload.email, name: payload.name || 'Utilisateur' });
   } catch (err) { return res.status(401).json({ error: 'Not authenticated' }); }
 });
 

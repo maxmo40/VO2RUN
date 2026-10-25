@@ -82,7 +82,7 @@
           if (saved.weight) profileForm.weight.value = saved.weight;
         } catch (error) {
           localStorage.removeItem(authStateKey);
-          window.location.href = './login.html';
+          window.location.replace('./login.html');
         }
       }
 
