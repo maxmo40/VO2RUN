@@ -204,6 +204,17 @@ app.get('/api/me', (req, res) => {
   } catch (err) { return res.status(401).json({ error: 'Not authenticated' }); }
 });
 
+app.post('/api/logout', (req, res) => {
+  const isSecure = process.env.NODE_ENV === 'production' || req.secure || req.headers['x-forwarded-proto'] === 'https';
+  res.clearCookie('token', {
+    httpOnly: true,
+    sameSite: isSecure ? 'none' : 'lax',
+    secure: isSecure,
+    path: '/',
+  });
+  return res.json({ ok: true });
+});
+
 // Create Stripe Checkout session (requires auth)
 app.post('/api/create-checkout-session', async (req, res) => {
   try {

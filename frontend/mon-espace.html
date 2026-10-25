@@ -99,7 +99,15 @@
         profileMessage.textContent = 'Informations enregistrées.';
       });
 
-      logoutBtn.addEventListener('click', () => {
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await fetch(`${API_BASE_URL}/api/logout`, {
+            method: 'POST',
+            credentials: 'include',
+          });
+        } catch (error) {
+          console.warn('Logout API unavailable', error);
+        }
         localStorage.removeItem(authStateKey);
         localStorage.removeItem(profileKey);
         window.location.href = './index.html';

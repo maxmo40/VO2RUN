@@ -227,6 +227,7 @@
       const registerPane = document.getElementById('registerPane');
 
       const authStateKey = 'vo2run-auth';
+
       async function updateAuthButton() {
         try {
           const response = await fetch(`${API_BASE_URL}/api/me`, { credentials: 'include' });
@@ -247,113 +248,145 @@
         }
       }
 
-      authBtn.addEventListener('click', (e) => {
-        if (!localStorage.getItem(authStateKey)) {
-          e.preventDefault();
-          authModal.style.display = 'flex';
+      authBtn.addEventListener('click', async (e) => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/me`, { credentials: 'include' });
+          if (response.ok) {
+            window.location.href = './mon-espace.html';
+            return;
+          }
+        } catch (error) {
+          // fallback to modal
         }
+        e.preventDefault();
+        authModal.style.display = 'flex';
       });
-      closeAuth.addEventListener('click', ()=> authModal.style.display='none');
-      tabLogin.addEventListener('click', ()=>{ loginPane.style.display='block'; registerPane.style.display='none'; });
-      tabRegister.addEventListener('click', ()=>{ registerPane.style.display='block'; loginPane.style.display='none'; });
 
-      // Register form
-      document.getElementById('registerForm').addEventListener('submit', async (e)=>{
+      closeAuth.addEventListener('click', () => authModal.style.display = 'none');
+      tabLogin.addEventListener('click', () => {
+        loginPane.style.display = 'block';
+        registerPane.style.display = 'none';
+      });
+      tabRegister.addEventListener('click', () => {
+        registerPane.style.display = 'block';
+        loginPane.style.display = 'none';
+      });
+
+      document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const msg = document.getElementById('registerMessage');
         msg.textContent = 'Envoi...';
         const f = e.target;
         const data = { name: f.name.value, email: f.email.value, password: f.password.value };
-        try{
-          const res = await fetch(`${API_BASE_URL}/api/register`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/register`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          });
           const body = await res.json();
-          if(!res.ok){ msg.textContent = body.error || 'Erreur'; return; }
-          msg.textContent = 'Compte créé — vous pouvez vous connecter.';
-          f.reset();
-        }catch(err){ console.error(err); msg.textContent = 'Erreur réseau'; }
+          if (!res.ok) {
+            msg.textContent = body.error || 'Erreur';
+            return;
+          }
+          localStorage.setItem(authStateKey, JSON.stringify({ email: data.email, name: data.name }));
+          authModal.style.display = 'none';
+          window.location.href = './mon-espace.html';
+        } catch (err) {
+          console.error(err);
+          msg.textContent = 'Erreur réseau';
+        }
       });
 
-      document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const msg = document.getElementById('loginMessage');
         msg.textContent = 'Connexion...';
         const f = e.target;
-        try{
-          const res = await fetch(`${API_BASE_URL}/api/login`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email: f.email.value, password: f.password.value }) });
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/login`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: f.email.value, password: f.password.value }),
+          });
           const body = await res.json();
-          if(!res.ok){ msg.textContent = body.error || 'Erreur'; return; }
+          if (!res.ok) {
+            msg.textContent = body.error || 'Erreur';
+            return;
+          }
 
-          localStorage.setItem(authStateKey, JSON.stringify({ email: f.email.value, name: 'Compte de démonstration' }));
-          updateAuthButton();
+          localStorage.setItem(authStateKey, JSON.stringify({ email: f.email.value, name: body.user?.name || 'Compte VO2RUN' }));
           authModal.style.display = 'none';
-          msg.textContent = 'Connecté. Vous pouvez maintenant accéder à votre espace utilisateur.';
-          loginPane.style.display = 'none';
-          registerPane.style.display = 'block';
-        }catch(err){ console.error(err); msg.textContent = 'Erreur réseau'; }
-      });
-
-      updateAuthButton();
-          authModal.style.display='none';
-          await initBookingUI();
-        }catch(err){ console.error(err); msg.textContent = 'Erreur réseau'; }
-      });
-
-      // Booking UI: show form only if logged in
-      async function initBookingUI(){
-        const container = document.querySelector('#reservation .form')?.parentElement;
-        if(!container) return;
-        const bookingSection = document.getElementById('reservation');
-        // check auth
-        let me;
-        try{
-          const r = await fetch(`${API_BASE_URL}/api/me`);
-          if(!r.ok) throw new Error('not auth');
-          me = await r.json();
-        }catch(e){
-          // not authenticated: show prompt
-          bookingSection.innerHTML = `\n            <h2>Réserver mon test</h2>\n            <p>Vous devez être connecté pour réserver un créneau.</p>\n            <p><a href="#" id="openAuthFromReserve" class="btn">Se connecter / S'inscrire</a></p>`;
-          document.getElementById('openAuthFromReserve').addEventListener('click',(ev)=>{ ev.preventDefault(); authModal.style.display='flex'; });
-          return;
+          window.location.href = './mon-espace.html';
+        } catch (err) {
+          console.error(err);
+          msg.textContent = 'Erreur réseau';
         }
+      });
 
-        // show booking form
-        bookingSection.innerHTML = `
-          <h2>Réserver mon test</h2>
-          <form id="bookingForm" class="form">
-            <label>Date <input type="date" name="date" required></label>
-            <label>Heure
-              <select name="time" required>
-                <option value="09:00">09:00</option>
-                <option value="10:30">10:30</option>
-                <option value="14:00">14:00</option>
-                <option value="15:30">15:30</option>
-              </select>
-            </label>
-            <div style="margin-top:8px"><button class="btn primary" type="submit">Payer et réserver</button></div>
-            <div id="bookingMessage" style="margin-top:8px"></div>
-          </form>
-        `;
-        // set min date to today
-        const dateInput = document.querySelector('#bookingForm input[name="date"]');
-        const today = new Date().toISOString().slice(0,10);
-        dateInput.setAttribute('min', today);
+      async function initBookingUI() {
+        const bookingSection = document.getElementById('reservation');
+        if (!bookingSection) return;
 
-        document.getElementById('bookingForm').addEventListener('submit', async (e)=>{
-          e.preventDefault();
-          const msg = document.getElementById('bookingMessage');
-          msg.textContent = 'Création du créneau...';
-          const f = e.target;
-          try{
-            const res = await fetch(`${API_BASE_URL}/api/create-checkout-session`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ date: f.date.value, time: f.time.value }) });
-            const body = await res.json();
-            if(!res.ok){ msg.textContent = body.error || 'Erreur'; return; }
-            // redirect to Stripe
-            window.location = body.url;
-          }catch(err){ console.error(err); msg.textContent = 'Erreur réseau'; }
-        });
+        try {
+          const r = await fetch(`${API_BASE_URL}/api/me`, { credentials: 'include' });
+          if (!r.ok) throw new Error('not auth');
+          const me = await r.json();
+          bookingSection.innerHTML = `
+            <h2>Réserver mon test</h2>
+            <form id="bookingForm" class="form">
+              <label>Date <input type="date" name="date" required></label>
+              <label>Heure
+                <select name="time" required>
+                  <option value="09:00">09:00</option>
+                  <option value="10:30">10:30</option>
+                  <option value="14:00">14:00</option>
+                  <option value="15:30">15:30</option>
+                </select>
+              </label>
+              <div style="margin-top:8px"><button class="btn primary" type="submit">Payer et réserver</button></div>
+              <div id="bookingMessage" style="margin-top:8px"></div>
+            </form>
+          `;
+
+          const dateInput = document.querySelector('#bookingForm input[name="date"]');
+          const today = new Date().toISOString().slice(0, 10);
+          dateInput.setAttribute('min', today);
+
+          document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msg = document.getElementById('bookingMessage');
+            msg.textContent = 'Création du créneau...';
+            const f = e.target;
+            try {
+              const res = await fetch(`${API_BASE_URL}/api/create-checkout-session`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: f.date.value, time: f.time.value }),
+              });
+              const body = await res.json();
+              if (!res.ok) {
+                msg.textContent = body.error || 'Erreur';
+                return;
+              }
+              window.location.href = body.url;
+            } catch (err) {
+              console.error(err);
+              msg.textContent = 'Erreur réseau';
+            }
+          });
+        } catch (e) {
+          bookingSection.innerHTML = `
+            <h2>Réserver mon test</h2>
+            <p>Vous devez être connecté pour réserver un créneau.</p>
+            <p><a href="./login.html?next=./reservation.html" class="btn">Se connecter / S'inscrire</a></p>`;
+        }
       }
 
-      // init booking UI on load
+      updateAuthButton();
       initBookingUI();
     </script>
   </body>

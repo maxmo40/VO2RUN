@@ -99,6 +99,7 @@
     </main>
 
     <script>
+      const API_BASE_URL = window.__API_URL__ || 'https://vo2run-production.up.railway.app';
       const authStateKey = 'vo2run-auth';
       const params = new URLSearchParams(window.location.search);
       const nextPage = params.get('next') || './reservation.html';
@@ -121,9 +122,19 @@
       const cgvCheckbox = document.getElementById('cgvCheckbox');
       const payBtn = document.getElementById('payBtn');
 
-      function ensureLoggedIn() {
-        const raw = localStorage.getItem(authStateKey);
-        if (!raw) {
+      async function ensureLoggedIn() {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/me`, {
+            credentials: 'include',
+          });
+          if (!response.ok) {
+            throw new Error('not authenticated');
+          }
+          const user = await response.json();
+          localStorage.setItem(authStateKey, JSON.stringify({ email: user.email, name: user.name || 'Utilisateur' }));
+          return;
+        } catch (error) {
+          localStorage.removeItem(authStateKey);
           window.location.href = './register.html?next=' + encodeURIComponent(nextPage);
         }
       }
